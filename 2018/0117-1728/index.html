@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>c++에서 malloc과 new의 차이점 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="제일 중요한 포인트는 생성자의 호출 유무이다.  malloc 동적 메모리를 할당한다.   new 동적 메모리를 할당한다. 생성자를 호출한다.">
+<meta name="keywords" content="c++,programming,oop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="c++에서 malloc과 new의 차이점">
+<meta property="og:url" content="https://yonmy.github.io/2018/0117-1728/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="제일 중요한 포인트는 생성자의 호출 유무이다.  malloc 동적 메모리를 할당한다.   new 동적 메모리를 할당한다. 생성자를 호출한다.">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-07-06T13:48:39.599Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="c++에서 malloc과 new의 차이점">
+<meta name="twitter:description" content="제일 중요한 포인트는 생성자의 호출 유무이다.  malloc 동적 메모리를 할당한다.   new 동적 메모리를 할당한다. 생성자를 호출한다.">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2018/0117-1728" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      c++에서 malloc과 new의 차이점
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2018/0117-1728/" class="article-date">
+  <time datetime="2018-01-17T08:28:12.000Z" itemprop="datePublished">2018-01-17</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>제일 중요한 포인트는 생성자의 호출 유무이다.</p>
+<ul>
+<li>malloc<ul>
+<li>동적 메모리를 할당한다.</li>
+</ul>
+</li>
+<li>new<ul>
+<li>동적 메모리를 할당한다.</li>
+<li>생성자를 호출한다.</li>
+</ul>
+</li>
+</ul>
+<p>마찬가지로, free와 delete의 핵심 차이점은 소멸자의 호출 여부</p>
+<p>기타 차이점으로는</p>
+<ul>
+<li>호출 하는 방법이 다르다.</li>
+<li>new 의 경우에 메모리 할당에 실패하면 예외(std::bad_alloc)가 발생한다.</li>
+</ul>
+<hr>
+<p>참고</p>
+<ul>
+<li><a href="https://msdn.microsoft.com/library/kftdy56f.aspx" target="_blank" rel="noopener">https://msdn.microsoft.com/library/kftdy56f.aspx</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/memory/new/operator_new" target="_blank" rel="noopener">http://en.cppreference.com/w/cpp/memory/new/operator_new</a></li>
+</ul>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/0117-1729/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          std::vector로 배우는 레벨업 1
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/1211-1358/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">std::vector의 size와 capacity에 대해서 제대로 알고있자</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

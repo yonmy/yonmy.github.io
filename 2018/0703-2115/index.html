@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>std::unique_ptr을 사용하자 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="최신의 c++에서 동적메모리 할당에 raw pointer를 사용하는 것보다는 std::unique_ptr을 사용해야 할 이유는 충분히 많이 있다. std::unique_ptr의 사용해야 할 이유가 생소한 사람은 “스콧 마이어스의 Effective Modern C++” 부터 읽어보길 추천한다.">
+<meta name="keywords" content="c++,programming">
+<meta property="og:type" content="article">
+<meta property="og:title" content="std::unique_ptr을 사용하자">
+<meta property="og:url" content="https://yonmy.github.io/2018/0703-2115/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="최신의 c++에서 동적메모리 할당에 raw pointer를 사용하는 것보다는 std::unique_ptr을 사용해야 할 이유는 충분히 많이 있다. std::unique_ptr의 사용해야 할 이유가 생소한 사람은 “스콧 마이어스의 Effective Modern C++” 부터 읽어보길 추천한다.">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-07-06T13:49:20.419Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="std::unique_ptr을 사용하자">
+<meta name="twitter:description" content="최신의 c++에서 동적메모리 할당에 raw pointer를 사용하는 것보다는 std::unique_ptr을 사용해야 할 이유는 충분히 많이 있다. std::unique_ptr의 사용해야 할 이유가 생소한 사람은 “스콧 마이어스의 Effective Modern C++” 부터 읽어보길 추천한다.">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2018/0703-2115" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      std::unique_ptr을 사용하자
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2018/0703-2115/" class="article-date">
+  <time datetime="2018-07-03T12:15:39.000Z" itemprop="datePublished">2018-07-03</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>최신의 c++에서 동적메모리 할당에 raw pointer를 사용하는 것보다는 std::unique_ptr을 사용해야 할 이유는 충분히 많이 있다.</p>
+<p>std::unique_ptr의 사용해야 할 이유가 생소한 사람은 “스콧 마이어스의 Effective Modern C++” 부터 읽어보길 추천한다.</p>
+<p>여기서는 생각해볼 문제로 2가지 관점에서 std::unique_ptr을 써야 하는 이유를 이야기해보고자 한다.</p>
+<h3 id="1-예외로-부터-보호하기"><a href="#1-예외로-부터-보호하기" class="headerlink" title="1. 예외로 부터 보호하기"></a>1. 예외로 부터 보호하기</h3><p>c++에서는 <a href="https://en.cppreference.com/w/cpp/language/raii" target="_blank" rel="noopener">RAII</a>를 활용하는 것이 정말 좋다. </p>
+<p>즉, raw pointer보다 std::unique_ptr이 더 좋다. </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CQueue</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="keyword">bool</span> <span class="title">Add</span><span class="params">(CTask* task)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">CQueue g_queue;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">UseRawPointer</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> task = <span class="keyword">new</span> CTask();</span><br><span class="line">	<span class="keyword">if</span> (g_queue.Add(task) == <span class="literal">false</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Add 실패시에는 메모리를 해제해주어야 한다.</span></span><br><span class="line">		<span class="keyword">delete</span> task;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">UseUniquePointer</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> task = <span class="built_in">std</span>::make_unique&lt;CTask&gt;();</span><br><span class="line">	<span class="keyword">if</span> (g_queue.Add(task.get()) == <span class="literal">true</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Add 성공시에 release를 해준다.(제어권은 g_queue로 넘어갔다)</span></span><br><span class="line">		task.release();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">DoSomething</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">try</span></span><br><span class="line">	&#123;</span><br><span class="line">		UseRawPointer();</span><br><span class="line">		UseUniquePointer();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">catch</span> (...)</span><br><span class="line">	&#123;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>만약 CQueue::Add 함수가 예외를 던진다면 어떻게 될까?</p>
+<p>UseRawPointer(); 함수는 메모리릭이 발생하지만, UseUniquePointer(); 함수는 메모리릭이 발생하지 않는다.</p>
+<hr>
+<h3 id="2-잘못-쓰기-어렵게-만들기"><a href="#2-잘못-쓰기-어렵게-만들기" class="headerlink" title="2. 잘못 쓰기 어렵게 만들기"></a>2. 잘못 쓰기 어렵게 만들기</h3><p>예를 들어서 CStream이라는 클래스가 있고, 생성자에서 CBuffer*를 입력해줄 것을 요구한다고 하자.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CStream</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CStream(CBuffer* buf);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Case1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	CBuffer* buf = <span class="keyword">new</span> CBuffer();</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="function">CStream <span class="title">stream</span><span class="params">(buf)</span></span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">delete</span> buf; <span class="comment">// CStream의 소멸자에서 delete를 하고 있다면....?</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Case2</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	CBuffer buf;</span><br><span class="line">	<span class="function">CStream <span class="title">stream</span><span class="params">(&amp;buf)</span></span>; <span class="comment">// CStream의 소멸자에서 delete를 하고 있다면....?</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CBuffer* 를 할당을 해서 넣어주어야 하는 것일까? 그렇다면 해제는 CStream이 하는것인가? 외부에서 따로 해야 하는 것인가?</p>
+<p>new를 안해도 되는 것일까?</p>
+<p>실제로 개발을 하다 보면, 반드시 new를 요구하는 케이스가 있고, 그렇지 않은 케이스가 있다.</p>
+<p>개발하면서는 기존에 사용한 코드를 참조하거나, 내부의 구현을 보고 적당히 잘 쓰는게 현실이다.</p>
+<p>나같은 경우는 c++에 move 연산자가 추가되면서 부터는 new를 요구하는 곳에서는 std::unique_ptr을 사용하려고 하고 있다.</p>
+<p>(인터페이스의 일관성 문제 등도 있고, 협업의 관점도 있고, 이미 진행된 코드에서는 그렇게 하지 못하지만…)</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CStreamNew</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CStreamNew(<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;CBuffer&gt;&amp;&amp; buffer)</span><br><span class="line">		: _buffer(<span class="built_in">std</span>::move(buffer)</span><br><span class="line">	&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;CBuffer&gt; _buffer;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">class CStreamNoNew</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CStreamNoNew(CBuffer* buffer)</span><br><span class="line">		: _buffer(buffer)</span><br><span class="line">	&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	CBuffer* _buffer;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/0531-0000/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Spin-Loop</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

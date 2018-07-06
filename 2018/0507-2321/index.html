@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>git p4 사용하기 - 인코딩문제 해결하기 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="최근에 합류한 게임프로젝트는 VCS로 Perforce를 사용하고 있다. 개인적으로는 Perforce를 처음사용해보는데, 클라이언트의 UI구성등이 익숙하지 않을뿐, Subversion과 크게 다르지 않아서 금방 적응 할 수 있었다.">
+<meta name="keywords" content="SCM,버전관리,게임개발,git,perforce">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git p4 사용하기 - 인코딩문제 해결하기">
+<meta property="og:url" content="https://yonmy.github.io/2018/0507-2321/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="최근에 합류한 게임프로젝트는 VCS로 Perforce를 사용하고 있다. 개인적으로는 Perforce를 처음사용해보는데, 클라이언트의 UI구성등이 익숙하지 않을뿐, Subversion과 크게 다르지 않아서 금방 적응 할 수 있었다.">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-07-06T13:49:10.543Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="git p4 사용하기 - 인코딩문제 해결하기">
+<meta name="twitter:description" content="최근에 합류한 게임프로젝트는 VCS로 Perforce를 사용하고 있다. 개인적으로는 Perforce를 처음사용해보는데, 클라이언트의 UI구성등이 익숙하지 않을뿐, Subversion과 크게 다르지 않아서 금방 적응 할 수 있었다.">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2018/0507-2321" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      git p4 사용하기 - 인코딩문제 해결하기
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2018/0507-2321/" class="article-date">
+  <time datetime="2018-05-07T14:21:29.000Z" itemprop="datePublished">2018-05-07</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>최근에 합류한 게임프로젝트는 VCS로 Perforce를 사용하고 있다.</p>
+<p>개인적으로는 Perforce를 처음사용해보는데, 클라이언트의 UI구성등이 익숙하지 않을뿐, Subversion과 크게 다르지 않아서 금방 적응 할 수 있었다.</p>
+<p>적응을 하면 할 수록 git이 계속 아쉬웠고, Perforce에 git을 연동해서 사용 할 수 있는 방법이 있다는 것은 알고 있었기 때문에 사용해보기로 했다.</p>
+<p>Perforce에서 git을 사용 할 수 있는 방법은 2가지가 있는데…</p>
+<ol>
+<li>Git Fusion</li>
+<li>git-p4</li>
+</ol>
+<p>Git Fusion은 서버를 건드려야 하니, 클라이언트만으로 해결 할 수 있는 p4를 사용해 보았다.</p>
+<p>자~알 된다!!</p>
+<p>git은 굉장히 유연하게 잘 설계되어 있는 것 같다.</p>
+<p>Perforce 뿐만이 아니라, Subversion과 Mercurial도 사용 하는 방법이 있다.</p>
+<p><a href="https://git-scm.com/book/en/v2/Git-and-Other-Systems-Git-as-a-Client" target="_blank" rel="noopener">https://git-scm.com/book/en/v2/Git-and-Other-Systems-Git-as-a-Client</a></p>
+<p>윈도우에서 git-p4를 사용할 수 있는 기본 셋팅은 이곳을 참조하자.</p>
+<p><a href="http://ericlathrop.com/2012/12/how-to-set-up-git-p4-in-windows/" target="_blank" rel="noopener">http://ericlathrop.com/2012/12/how-to-set-up-git-p4-in-windows/</a></p>
+<p>하지만! 인코딩과 관련된 문제를 겪게 되었는데….</p>
+<p>내가 사용하고 있는 Perforce는 cp949 한글 인코딩을 사용하고 있다.</p>
+<p>git의 기본 인코딩은 utf-8이지만, 이것을 바꿀 수 있는 방법이 있다.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git config --global i18n.commitEncoding cp949</span><br><span class="line"></span><br><span class="line">git config --global i18n.logOutputEncoding cp949</span><br></pre></td></tr></table></figure>
+<p>그리고 git의 기본 gui client에서 잘 보이게 하려면 이렇게 하면 된다.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global gui.encoding cp949</span><br></pre></td></tr></table></figure>
+<p>이렇게 세팅해서 사용하면, git bash와 git gui, gitk만 사용한다면 아무 문제없이 잘 사용 할 수 있다.</p>
+<p>하지만… 저것들로만 불편해서 보통 별도의 GUI Client를 사용하는데…</p>
+<p>이 GUI Client중에 인코딩을 해결 할 수 있는 것을 못찾았다….</p>
+<p>아…. 도저히 못 찾겠다. 혹시 방법을 아는 분은 알려주길….</p>
+<p>그렇다고 이대로, 기본툴로만 개발 할 수는 없는일…</p>
+<p>용감하게(?) git-p4.py를 수정해보기로 했고, 의외로 쉽게 해결 할 수 있었다.</p>
+<p>원리는 git p4 sync로 가지고 올때는 cp949를 utf-8로 변경, git p4 submit을 할 때는 utf-8을 cp949로 변경</p>
+<p>이렇게 하기 위해서 git config에 perforce의 인코딩이 무엇인지 알려주어야 한다.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global git-p4.charset cp949</span><br></pre></td></tr></table></figure>
+<p>(위에 하던 설정들은 하지말고, 이것만!!)</p>
+<p><a href="https://github.com/yonmy/git/blob/git-p4-charset/git-p4.py" target="_blank" rel="noopener">https://github.com/yonmy/git/blob/git-p4-charset/git-p4.py</a></p>
+<p>공식 git에 이 수정사항을 pull request한 상태인데,</p>
+<p>반영해 줄라나? 이슈로 만든다음에 요청해야 하는 것인가?</p>
+<p>영어가 약해서… 모르겠다… 안해주면 말고…</p>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/0531-0000/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Spin-Loop
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/0507-1041/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">게임개발에서 버젼 관리 시스템</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

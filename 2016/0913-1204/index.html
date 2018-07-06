@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>tuple의 모든 타입이 arithmetic type 인지 알아내는 템플릿 클래스 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="최근에 C#으로 코딩좀 하고 있는데… 역시 c++의 강력한 template이 그립다..">
+<meta name="keywords" content="c++,programming,stl,template">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tuple의 모든 타입이 arithmetic type 인지 알아내는 템플릿 클래스">
+<meta property="og:url" content="https://yonmy.github.io/2016/0913-1204/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="최근에 C#으로 코딩좀 하고 있는데… 역시 c++의 강력한 template이 그립다..">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-07-06T13:48:09.764Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tuple의 모든 타입이 arithmetic type 인지 알아내는 템플릿 클래스">
+<meta name="twitter:description" content="최근에 C#으로 코딩좀 하고 있는데… 역시 c++의 강력한 template이 그립다..">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2016/0913-1204" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      tuple의 모든 타입이 arithmetic type 인지 알아내는 템플릿 클래스
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2016/0913-1204/" class="article-date">
+  <time datetime="2016-09-13T03:04:23.000Z" itemprop="datePublished">2016-09-13</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>최근에 C#으로 코딩좀 하고 있는데…</p>
+<p>역시 c++의 강력한 template이 그립다..</p>
+<p>개인적으로 OOP형태의 언어에서는 c++의 template 때문에 c++을 버릴 수 없을 것 같다. ㅠ</p>
+<p>필요할 것 같아서 작성했는데…</p>
+<p>std::is_arithmetic 은 integral type(short, int, __int64 …) 이나 floating-point type(float, double) 이면 true이다.</p>
+<p>이걸 tuple의 모든 항목이 true인지 검사하는 템플릿 클래스를 만들어 보았다.</p>
+<p>참고로, std::is_arithmetic&lt; std::tuple&lt;…&gt; &gt;::value = false 이다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">Tuple</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">struct</span> <span class="title">IsTupleAllArithmetic</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span>... <span class="title">Args</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">struct</span> <span class="title">IsTupleAllArithmetic</span>&lt; std::tuple&lt;Args...&gt; &gt;</span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">Tuple</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="title">struct</span> <span class="title">IsInternal</span>;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span>... <span class="title">Args</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="title">struct</span> <span class="title">IsInternal</span>&lt; std::tuple&lt;Args...&gt; &gt;</span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        <span class="function"><span class="keyword">constexpr</span> <span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">operator</span>()(<span class="built_in">std</span>::integral_constant&lt;<span class="keyword">size_t</span>, <span class="number">0</span>&gt;());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">template</span>&lt;<span class="keyword">size_t</span> INDEX&gt;</span><br><span class="line">        <span class="function"><span class="keyword">constexpr</span> <span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="built_in">std</span>::integral_constant&lt;<span class="keyword">size_t</span>, INDEX&gt;)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">return</span>  <span class="built_in">std</span>::is_arithmetic&lt; <span class="built_in">std</span>::tuple_element&lt;INDEX, <span class="built_in">std</span>::tuple&lt;Args...&gt; &gt;::type &gt;::value</span><br><span class="line">                &amp;&amp;  <span class="keyword">operator</span>()(<span class="built_in">std</span>::integral_constant&lt;<span class="keyword">size_t</span>, INDEX + <span class="number">1</span>&gt;());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">template</span>&lt;&gt;</span><br><span class="line">        <span class="function"><span class="keyword">constexpr</span> <span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="built_in">std</span>::integral_constant&lt;<span class="keyword">size_t</span>, <span class="built_in">std</span>::tuple_size&lt; <span class="built_in">std</span>::tuple&lt;Args...&gt; &gt;::value&gt;)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> value = IsInternal&lt; <span class="built_in">std</span>::tuple&lt;Args...&gt; &gt;()();</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">assert(<span class="built_in">std</span>::is_arithmetic&lt; <span class="built_in">std</span>::tuple&lt;<span class="keyword">int</span>, __int64, <span class="keyword">float</span>, <span class="keyword">double</span>&gt; &gt;::value == <span class="literal">false</span>);</span><br><span class="line">assert(IsTupleAllArithmetic&lt; <span class="built_in">std</span>::tuple&lt;<span class="keyword">int</span>, __int64, <span class="keyword">float</span>, <span class="keyword">double</span>&gt; &gt;::value == <span class="literal">true</span>);</span><br><span class="line">assert(IsTupleAllArithmetic&lt; <span class="built_in">std</span>::tuple&lt;<span class="keyword">int</span>, __int64*, <span class="keyword">float</span>, <span class="keyword">double</span>&gt; &gt;::value == <span class="literal">false</span>);</span><br><span class="line">assert(IsTupleAllArithmetic&lt; <span class="built_in">std</span>::tuple&lt;<span class="keyword">int</span>, __int64, <span class="built_in">std</span>::<span class="built_in">string</span>, <span class="keyword">double</span>&gt; &gt;::value == <span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+<p>응용하면 std::is_integral, std::is_floating_point, std::is_same 등도 만들 수 있다.</p>
+<p>VS2015기준으로 작성되어있다.</p>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/1211-1248/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          가상 소멸자(virtual destructor)에 대한 정확한 이해
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/0505-1259/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">swap을 사용하면 최적화 할 수 있다.</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

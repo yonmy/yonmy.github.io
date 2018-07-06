@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>가상 소멸자(virtual destructor)에 대한 정확한 이해 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="C++입문자들이 가상 소멸자에대해서 잘 모르는 것을 많이 봤다. 또, 어느정도 했다는 프로그래머중에서도 정확히는 모르는 사람들이 꽤 있드라…">
+<meta name="keywords" content="c++,programming">
+<meta property="og:type" content="article">
+<meta property="og:title" content="가상 소멸자(virtual destructor)에 대한 정확한 이해">
+<meta property="og:url" content="https://yonmy.github.io/2016/1211-1248/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="C++입문자들이 가상 소멸자에대해서 잘 모르는 것을 많이 봤다. 또, 어느정도 했다는 프로그래머중에서도 정확히는 모르는 사람들이 꽤 있드라…">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://yonmy.github.io/content/imgs/2016/20161211-1.png">
+<meta property="og:image" content="https://yonmy.github.io/content/imgs/2016/20161211-2.png">
+<meta property="og:updated_time" content="2018-07-06T13:48:17.022Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="가상 소멸자(virtual destructor)에 대한 정확한 이해">
+<meta name="twitter:description" content="C++입문자들이 가상 소멸자에대해서 잘 모르는 것을 많이 봤다. 또, 어느정도 했다는 프로그래머중에서도 정확히는 모르는 사람들이 꽤 있드라…">
+<meta name="twitter:image" content="https://yonmy.github.io/content/imgs/2016/20161211-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2016/1211-1248" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      가상 소멸자(virtual destructor)에 대한 정확한 이해
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2016/1211-1248/" class="article-date">
+  <time datetime="2016-12-11T03:48:08.000Z" itemprop="datePublished">2016-12-11</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>C++입문자들이 가상 소멸자에대해서 잘 모르는 것을 많이 봤다.</p>
+<p>또, 어느정도 했다는 프로그래머중에서도 정확히는 모르는 사람들이 꽤 있드라…</p>
+<p>“Effective C++ 항목7” 에 이 부분에 대한 설명이 있지만, 초보자들이 이해하기에는 다소 어려움이 있어 보여, 이부분에 대해 이해도를 높여 보고자 한다.</p>
+<p>(다형성을 가진 virtual class에서) 가상 소멸자(virtual destructor)를 사용하지 않으면 문제는 무엇인가?</p>
+<p>라는 질문을 했을때 다음과 같은 대답을 한다면 70점을 줄 것이다.</p>
+<p>메모리 릭이 발생합니다</p>
+<p>소멸자의 호출여부를 제대로 알고 있어야 100점이라고 할 수 있다. 대략</p>
+<p>(파생 클래스의) 소멸자가 제대로 호출되지 않을 수 있어, 메모리릭을 포함해서 부분 소멸될 수 밖에 없는 문제점이 발생할 수 있습니다</p>
+<p>C++은 생성자, 소멸자가 굉장히 중요하다는 것을 잊어서는 안된다.</p>
+<p>생성자에서 락일 걸고, 소멸자에서 락을 해제하는 방법을 사용하며, 생성자에서 파일을 열고, 소멸자에서 파일을 닫는 방법을 사용하기도 한다.</p>
+<p>위의 예에서 소멸자가 호출되지 않는다면 일어나는 문제점은 잘 알 수 있을 것이다.</p>
+<p>메모리 릭이 발생한다고 대답하는 것은 왜 70점짜리 대답인지 자세히 알아보면,</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Abstract</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Abstract()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"Abstract()"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~Abstract()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"~Abstract()"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span> :</span> <span class="keyword">public</span> Abstract</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Foo()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"Foo()"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ~Foo()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"~Foo()"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">array</span>&lt;<span class="keyword">char</span>, 1024*1024&gt; _data;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span> :</span> <span class="keyword">public</span> Abstract</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    Bar()</span><br><span class="line">        : _data(<span class="built_in">std</span>::make_unique&lt;<span class="keyword">char</span>[]&gt;(<span class="number">1024</span> * <span class="number">1024</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"Bar()"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ~Bar()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"~Bar()"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">char</span>[]&gt; _data;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>Abstract의 소멸자에는 virtual 키워드가 없다.</p>
+<p>이를 상속받은 Foo, Bar 2개의 class가 있는데,</p>
+<p>Foo 클래스는 메모리릭 문제가 존재하지 않는다.</p>
+<p>왜냐하면, Foo가 가지고 있는 데이터는 순전히 HeapManager에 의해서 할당/해제가 되기 때문에 소멸자의 호출여부와는 무관하기 때문</p>
+<p>소멸자에서 하는 일이라고는 “~Foo()”를 출력하는 것 뿐</p>
+<p>하지만, Bar 클래스는 메모리릭 문제가 발생 할 수 있다.</p>
+<p>왜냐하면, char[]에대한 해제는 소멸자가 호출되어야만 발생 할 수 있기 때문</p>
+<p>VS2015의 Heap Profile을 이용해서 확인해 보면,</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ::Sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    &#123; <span class="comment">// 1. 정상적인 소멸자 호출로 메모리 릭이 발생하지 않는다.</span></span><br><span class="line">        Foo* p = <span class="keyword">new</span> Foo();</span><br><span class="line">        ::Sleep(<span class="number">1000</span>);</span><br><span class="line">        <span class="keyword">delete</span> p;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    ::Sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    &#123; <span class="comment">// 2. ~Foo(); 가 호출되지는 않지만 메모리 릭은 발생하지 않는다.</span></span><br><span class="line">        Abstract* p = <span class="keyword">new</span> Foo();</span><br><span class="line">        ::Sleep(<span class="number">1000</span>);</span><br><span class="line">        <span class="keyword">delete</span> p;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    ::Sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    &#123; <span class="comment">// 3. 정상적인 소멸자 호출로 메모리 릭이 발생하지 않는다.</span></span><br><span class="line">        Bar* p = <span class="keyword">new</span> Bar();</span><br><span class="line">        ::Sleep(<span class="number">1000</span>);</span><br><span class="line">        <span class="keyword">delete</span> p;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    ::Sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    &#123; <span class="comment">// 4. ~Bar(); 가 호출되지도 않고, 메모리릭도 발생!</span></span><br><span class="line">        Abstract* p = <span class="keyword">new</span> Bar();</span><br><span class="line">        ::Sleep(<span class="number">1000</span>);</span><br><span class="line">        <span class="keyword">delete</span> p;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    ::Sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/content/imgs/2016/20161211-1.png" alt=""></p>
+<p>~Foo()의 소멸자 호출과는 관계없이 메모리가 해제되는 2번째 파동을 볼 수 있다.</p>
+<p>하지만, ~Bar()의 소멸자가 호출되지 않고 메모리가 해제된다면 생기는 4번째 파동은 볼 수 없다.</p>
+<p>정상적으로 Abstract의 소멸자에 virtual을 붙인다면 어떨까?</p>
+<p><img src="/content/imgs/2016/20161211-2.png" alt=""></p>
+<hr>
+<p>참고</p>
+<h6 id="Effective-C-Third-Edition-2005-Scott-Meyers"><a href="#Effective-C-Third-Edition-2005-Scott-Meyers" class="headerlink" title="Effective C++, Third Edition, 2005. Scott Meyers"></a>Effective C++, Third Edition, 2005. Scott Meyers</h6>
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/1211-1358/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          std::vector의 size와 capacity에 대해서 제대로 알고있자
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/0913-1204/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">tuple의 모든 타입이 arithmetic type 인지 알아내는 템플릿 클래스</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

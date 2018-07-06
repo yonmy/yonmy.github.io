@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>std::vector의 size와 capacity에 대해서 제대로 알고있자 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="std::vector를 제대로 알고, 제대로 쓰고 있는가를 파악할 때 내가 자주 하는 질문은 reserve와 resize에 대해 설명해 보세요.">
+<meta name="keywords" content="c++,programming,stl,vector">
+<meta property="og:type" content="article">
+<meta property="og:title" content="std::vector의 size와 capacity에 대해서 제대로 알고있자">
+<meta property="og:url" content="https://yonmy.github.io/2016/1211-1358/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="std::vector를 제대로 알고, 제대로 쓰고 있는가를 파악할 때 내가 자주 하는 질문은 reserve와 resize에 대해 설명해 보세요.">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://yonmy.github.io/content/imgs/2016/20161211-3.png">
+<meta property="og:updated_time" content="2018-07-06T13:48:29.699Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="std::vector의 size와 capacity에 대해서 제대로 알고있자">
+<meta name="twitter:description" content="std::vector를 제대로 알고, 제대로 쓰고 있는가를 파악할 때 내가 자주 하는 질문은 reserve와 resize에 대해 설명해 보세요.">
+<meta name="twitter:image" content="https://yonmy.github.io/content/imgs/2016/20161211-3.png">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2016/1211-1358" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      std::vector의 size와 capacity에 대해서 제대로 알고있자
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2016/1211-1358/" class="article-date">
+  <time datetime="2016-12-11T04:58:16.000Z" itemprop="datePublished">2016-12-11</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>std::vector를 제대로 알고, 제대로 쓰고 있는가를 파악할 때 내가 자주 하는 질문은</p>
+<p>reserve와 resize에 대해 설명해 보세요.</p>
+<p>의외로 많은 프로그래머가 제대로 대답하지 못한다.</p>
+<p>저 질문을 대답하기 위해서는 size와 capacity에 대해서 잘 알고 있어야 하는데..</p>
+<p>사실, std::vector을 사용하기에 앞서 어떻게 구현이 되어있을까? 라고 고민을 해보면 추측할 수 있는 문제가 아닌가 하는 안타까움이 들때가 많다.</p>
+<p>이제 막 입문하는 사람은 그렇다 치고, 어느정도 사용하다보면, 당연히 가지게 되는 의문과 고민, 추측이 아닌가?</p>
+<p>그것은 나만 기대하는 욕심인 것인가?</p>
+<p><img src="/content/imgs/2016/20161211-3.png" alt=""></p>
+<p>위 그림을 보면 대부분은 이해할 것이라고 생각한다.</p>
+<p>capacity는 vector의 요소(element)들을 담을 수 있는 메모리가 할당되어 있는 공간의 용량이다.</p>
+<p>size는 실제 유효한 요소(element)들의 갯수이다.</p>
+<p>예를 들어, push_back함수를 통해 새로운 요소(element)를 맨뒤에 한개 추가할 때,</p>
+<p>capacity &gt; size보다 큰 상황이면 그냥 맨뒤의 공간에 요소를 복사해 넣고 ++size만 일어나며,</p>
+<p>capacity == size 이면 capacity가 증가한 새로운 연속된 공간을 할당하고… 기존의 모든 요소들을 복사하여(기존 정보는 지우고..) capacity &gt; size인 상황을 만들어 놓고, 맨뒤에 요소를 복사해 놓고, ++size를 하는 과정이 일어나는 것이다.</p>
+<p>reserve는 이 capacity를 프로그래머가 원하는 크기로 할당을 해준다.</p>
+<p>여기까지 size, capacity, reserve에 대해서 이해했으리라 믿고, Effective STL의 항목 14. reserve는 필요 없이 메모리가 재할당되는 것을 막아 준다.(Use reserve to avoid unnecessary reallocations)를 공부해 보길 바란다.</p>
+<p>여기서는 resize에 대해서 조금 더 이야기를 해보려고 한다.</p>
+<p>resize에 대해서 다음과 같이 설명하는 사람에게는 나는 70점을 줄 것이다.</p>
+<p>지정한 수 만큼 요소를 만들어 준다. 내부에서 capacity가 작으면 재할당이 일어나며…</p>
+<p>resize에서 한가지 더 중요한 것이 있는데, 증가되는 size만큼 복사생성자가 호출된다는 점이다.</p>
+<p>(c++11까지는 복사생성자가 호출 됬었는데, 최신은 생성자가 호출된다.)</p>
+<p>resize의 원형을 보자</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">void resize( size_type count, T value = T() ); // (until C++11)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">resize</span><span class="params">( size_type count )</span></span>; <span class="comment">// (1)	(since C++11)</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">resize</span><span class="params">( size_type count, <span class="keyword">const</span> value_type&amp; value )</span></span>; <span class="comment">// (2)	(since C++11)</span></span><br></pre></td></tr></table></figure>
+<p>C++ 11 이전 버젼이든 C++ 11 이후 버젼이든, 기본값을 따로 지정하지 않으면, default 생성자에 의해서 모든 요소가 초기화 된다는 사실은 동일하다.</p>
+<p>과거에 이렇게 코딩한 사람을 본적이 있는데… 이는 resize의 스펙을 잘 모르고 한 바보같은….</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; temp;</span><br><span class="line">temp.resize(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 불필요한 중복 초기화 작업</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span> ; ++i)</span><br><span class="line">&#123;</span><br><span class="line">	temp[i] = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>참고</p>
+<ul>
+<li><a href="http://en.cppreference.com/w/cpp/container/vector/size" target="_blank" rel="noopener">http://en.cppreference.com/w/cpp/container/vector/size</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/container/vector/capacity" target="_blank" rel="noopener">http://en.cppreference.com/w/cpp/container/vector/capacity</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/container/vector/reserve" target="_blank" rel="noopener">http://en.cppreference.com/w/cpp/container/vector/reserve</a></li>
+<li><a href="http://en.cppreference.com/w/cpp/container/vector/resize" target="_blank" rel="noopener">http://en.cppreference.com/w/cpp/container/vector/resize</a></li>
+<li>Effective STL, 2001, Scott Meyers</li>
+</ul>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/0117-1728/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          c++에서 malloc과 new의 차이점
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/1211-1248/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">가상 소멸자(virtual destructor)에 대한 정확한 이해</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

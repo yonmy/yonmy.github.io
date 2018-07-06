@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>std::vector로 배우는 레벨업 1 | YonMy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="선행학습: std::vector의 size와 capacity에 대해서 제대로 알고있자 std::vector의 push_back과 reserve를 한번 직접 구현해보자..">
+<meta name="keywords" content="c++,programming,stl,vector,template">
+<meta property="og:type" content="article">
+<meta property="og:title" content="std::vector로 배우는 레벨업 1">
+<meta property="og:url" content="https://yonmy.github.io/2018/0117-1729/index.html">
+<meta property="og:site_name" content="YonMy">
+<meta property="og:description" content="선행학습: std::vector의 size와 capacity에 대해서 제대로 알고있자 std::vector의 push_back과 reserve를 한번 직접 구현해보자..">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-07-06T13:48:48.806Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="std::vector로 배우는 레벨업 1">
+<meta name="twitter:description" content="선행학습: std::vector의 size와 capacity에 대해서 제대로 알고있자 std::vector의 push_back과 reserve를 한번 직접 구현해보자..">
+  
+    <link rel="alternative" href="/atom.xml" title="YonMy" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-2018/0117-1729" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      std::vector로 배우는 레벨업 1
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2018/0117-1729/" class="article-date">
+  <time datetime="2018-01-17T08:29:36.000Z" itemprop="datePublished">2018-01-17</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>선행학습: <a href="/2016/1211-1358/" title="std::vector의 size와 capacity에 대해서 제대로 알고있자">std::vector의 size와 capacity에 대해서 제대로 알고있자</a></p>
+<p>std::vector의 push_back과 reserve를 한번 직접 구현해보자..</p>
+<p>언뜻 생각해보면 template에 대해서 조금만 알고 있으면 다음과 같이 쉽게 구현 할 수 있을 거라는 생각이 들 것이다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">class</span> <span class="title">MyVector</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	MyVector()</span><br><span class="line">		: _data(<span class="literal">nullptr</span>)</span><br><span class="line">		, _size(<span class="number">0</span>)</span><br><span class="line">		, _capacity(<span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	~MyVector()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">delete</span>[] _data;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">size_t</span> size() <span class="keyword">const</span> <span class="keyword">noexcept</span> &#123; <span class="keyword">return</span> _size; &#125;</span><br><span class="line">	<span class="keyword">size_t</span> capacity() <span class="keyword">const</span> <span class="keyword">noexcept</span> &#123; <span class="keyword">return</span> _capacity; &#125;</span><br><span class="line"></span><br><span class="line">	T&amp; <span class="keyword">operator</span>[](<span class="keyword">size_t</span> idx)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span> _data[idx];</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">reserve</span><span class="params">(<span class="keyword">size_t</span> newCapacity)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (_capacity &lt; newCapacity)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">// 더 큰 공간을 할당 하고</span></span><br><span class="line">			T* newData = <span class="keyword">new</span> T[newCapacity];</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 기존의 _data를 복사한다.</span></span><br><span class="line">			<span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; _size; ++i)</span><br><span class="line">			&#123;</span><br><span class="line">				newData[i] = _data[i];</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 기존의 _data는 메모리 해제</span></span><br><span class="line">			<span class="keyword">delete</span>[] _data;</span><br><span class="line">			_data = newData;</span><br><span class="line">			_capacity = newCapacity;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">push_back</span><span class="params">(<span class="keyword">const</span> T&amp; value)</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (_capacity &lt;= _size)</span><br><span class="line">		&#123;</span><br><span class="line">			reserve(calculate_growth(_capacity + <span class="number">1</span>));</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		_data[_size++] = value; <span class="comment">// 복사 및 사이즈 증가</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="keyword">size_t</span> calculate_growth(<span class="keyword">const</span> <span class="keyword">size_t</span> new_size) <span class="keyword">const</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (_capacity &gt; <span class="built_in">std</span>::numeric_limits&lt;<span class="keyword">size_t</span>&gt;::max() - _capacity / <span class="number">2</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">return</span> (new_size);	<span class="comment">// geometric growth would overflow</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">const</span> <span class="keyword">size_t</span> geometric = _capacity + _capacity / <span class="number">2</span>;</span><br><span class="line">		<span class="keyword">if</span> (geometric &lt; new_size)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">return</span> (new_size);	<span class="comment">// geometric growth would be insufficient</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> (geometric);	<span class="comment">// geometric growth is sufficient</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	T* _data;</span><br><span class="line">	<span class="keyword">size_t</span> _size;</span><br><span class="line">	<span class="keyword">size_t</span> _capacity;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>한번 다음의 테스트 코드로 std::vector과 MyVector의 출력결과가 어떻게 다른지 확인해 보면….</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Foo temp;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"1-1. std::vector&lt;Foo&gt; :"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;Foo&gt; stdVec;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"1-2. std::vector&lt;Foo&gt;::reserve(2) :"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">stdVec.reserve(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"1-3. std::vector&lt;Foo&gt;::push_back(temp) :"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">stdVec.push_back(temp);</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"2-1. MyVector&lt;Foo&gt; :"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">MyVector&lt;Foo&gt; myVec;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"2-2. MyVector&lt;Foo&gt;::reserve(2) :"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">myVec.reserve(<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"2-3. MyVector&lt;Foo&gt;::push_back(temp) :"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">myVec.push_back(temp);</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Foo()</span><br><span class="line">1-1. std::vector&lt;Foo&gt; :</span><br><span class="line">1-2. std::vector&lt;Foo&gt;::reserve(2) :</span><br><span class="line">1-3. std::vector&lt;Foo&gt;::push_back(temp) :</span><br><span class="line">  Foo(const Foo&amp;) <span class="comment">#c++ 버젼에 따라 Foo&amp; operator=(const Foo&amp;) 일 수도 있음</span></span><br><span class="line">2-1. MyVector&lt;Foo&gt; :</span><br><span class="line">2-2. MyVector&lt;Foo&gt;::reserve(2) :</span><br><span class="line">  Foo()</span><br><span class="line">  Foo()</span><br><span class="line">2-3. MyVector&lt;Foo&gt;::push_back(temp) :</span><br><span class="line">  Foo&amp; operator=(const Foo&amp;)</span><br></pre></td></tr></table></figure>
+<hr>
+<p>push_back을 했을때 복사생성자가 호출되느냐 대입연산자가 호출되느냐는 c++ 버젼에 따라 차이가 있을 수 있으니, 동일하다고 치고,</p>
+<p>stl버젼은 reserve를 했을때 생성자가 호출되지 않지만, MyVector는 생성자가 2번 호출되는 차이점을 볼 수 있다.</p>
+<p>이 차이가 의미하는 것은 무엇일까?</p>
+<p>눈치가 빠른분들은 이미 감을 잡으셨을 것이다.</p>
+<p>그렇다. vector에서 reserve함수를 통하여 capacity의 크기를 늘린다는 것은 메모리공간만 할당하는 것이지, 실제 객체가 생성되는 것은 아니다.</p>
+<p>혹시, 아직 c++에서 객체 생성의 의미를 정확히 모르고 있었다면, 이제는 정확히 이해 했을 것이다.</p>
+<p>(잘 모르겠으면 <a href="/2018/0117-1728/" title="c++에서 malloc과 new의 차이점">c++에서 malloc과 new의 차이점</a>을 읽어보자)</p>
+<p>그럼 한번 요구사항에 맞게 코드를 고쳐보자</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">~MyVector()</span><br><span class="line">&#123;</span><br><span class="line">	::<span class="function"><span class="keyword">operator</span> <span class="title">delete</span><span class="params">(_data)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">reserve</span><span class="params">(<span class="keyword">size_t</span> newCapacity)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (_capacity &lt; newCapacity)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// 더 큰 공간을 할당 하고</span></span><br><span class="line">		<span class="keyword">const</span> <span class="keyword">size_t</span> bytes = <span class="keyword">sizeof</span>(T) * newCapacity;</span><br><span class="line">		T* newData = <span class="keyword">static_cast</span>&lt;T*&gt;(::<span class="keyword">operator</span> <span class="keyword">new</span>(bytes));</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 기존의 _data를 복사한다.</span></span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; _size; ++i)</span><br><span class="line">		&#123;</span><br><span class="line">			newData[i] = _data[i];</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 기존의 _data는 메모리 해제</span></span><br><span class="line">		::<span class="function"><span class="keyword">operator</span> <span class="title">delete</span><span class="params">(_data)</span></span>;</span><br><span class="line">		_data = newData;</span><br><span class="line">		_capacity = newCapacity;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이제 std::vector와 동일한 결과가 나옴을 확인 할 수 있을 것이다.</p>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/0118-1539/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          std::vector로 배우는 레벨업 2
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/0117-1728/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">c++에서 malloc과 new의 차이점</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        <aside id="sidebar">
+  <nav class="menus">
+  	<ul>
+  		<li><a href="/" title="Home"><i class="icon icon-home"></i></a></li>
+  		
+			<li><a href="/archives" title="Archives"><i class="icon icon-fenlei"></i></a></li>
+  		
+  		
+			<li><a href="/tags" title="Tags"><i class="icon icon-tag"></i></a></li>
+  		
+  		
+  			<li><a href="https://github.com/yonmy" target="_blank" title="https://github.com/yonmy"><i class="icon icon-github"></i></a></li>
+  		
+  	</ul>
+  </nav>
+  <a id="go-top" href="#"><i class="icon icon-up"></i></a>
+</aside>
+
+      </div>
+      <footer id="footer">
+  
+	
+	<div id="footer-info" class="inner">
+		&copy; 
+		 2016 -  2018 yonmy 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tag</a>
+  
+    <a href="https://github.com/yonmy" class="mobile-nav-link">Github</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
